@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: fcg
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fcg_secret}
+      POSTGRES_DB: fcg_payments_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U fcg -d fcg_payments_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  payments-worker:
+    build: .
+    environment:
+      ConnectionStrings__Postgres: "Host=postgres;Port=5432;Database=fcg_payments_db;Username=fcg;Password=${POSTGRES_PASSWORD:-fcg_secret}"
+      RabbitMq__Host: rabbitmq
+      RabbitMq__Username: guest
+      RabbitMq__Password: ${RABBITMQ_PASSWORD:-guest}
+      DOTNET_ENVIRONMENT: Production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
