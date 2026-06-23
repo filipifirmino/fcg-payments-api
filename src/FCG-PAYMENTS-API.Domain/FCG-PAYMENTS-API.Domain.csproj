@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>FCG.Payments.Domain</RootNamespace>
+    <AssemblyName>FCG-PAYMENTS-API.Domain</AssemblyName>
+  </PropertyGroup>
+
+</Project>
