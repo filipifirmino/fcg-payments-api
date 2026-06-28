@@ -16,11 +16,9 @@ RUN dotnet publish src/FCG-PAYMENTS-API.Worker/FCG-PAYMENTS-API.Worker.csproj \
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS runtime
 WORKDIR /app
 
-RUN apk add --no-cache krb5-libs wget \
-    && adduser -D -u 1001 paymentApiUser && chown -R paymentApiUser /app
-COPY --from=build /app/publish .
-
+COPY --chown=paymentApiUser:paymentApiUser --from=build /app/publish .
 USER paymentApiUser
+
 EXPOSE 8082
 ENV ASPNETCORE_URLS=http://+:8082
 
