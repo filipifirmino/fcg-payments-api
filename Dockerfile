@@ -16,6 +16,8 @@ RUN dotnet publish src/FCG-PAYMENTS-API.Worker/FCG-PAYMENTS-API.Worker.csproj \
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS runtime
 WORKDIR /app
 
+RUN addgroup -S paymentApiUser && adduser -S -G paymentApiUser -u 1001 paymentApiUser
+
 COPY --chown=paymentApiUser:paymentApiUser --from=build /app/publish .
 USER paymentApiUser
 
