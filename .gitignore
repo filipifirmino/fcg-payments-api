@@ -405,3 +405,12 @@ Claude.md
 
 # Git
 .gitignore
+
+# Secrets e configurações sensíveis
+.env
+.env.*
+!.env.example
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Staging.json
+k8s/secret.yaml
