@@ -11,9 +11,17 @@ RUN dotnet restore src/FCG-PAYMENTS-API.Worker/FCG-PAYMENTS-API.Worker.csproj
 COPY . .
 
 RUN dotnet publish src/FCG-PAYMENTS-API.Worker/FCG-PAYMENTS-API.Worker.csproj \
-    -c Release -o /app/publish --no-restore
+    -c Release -o /app/publish /p:UseAppHost=false
 
-FROM mcr.microsoft.com/dotnet/runtime:10.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS runtime
 WORKDIR /app
+
+RUN apk add --no-cache krb5-libs wget \
+    && adduser -D -u 1001 paymentApiUser && chown -R paymentApiUser /app
 COPY --from=build /app/publish .
+
+USER paymentApiUser
+EXPOSE 8082
+ENV ASPNETCORE_URLS=http://+:8082
+
 ENTRYPOINT ["dotnet", "FCG-PAYMENTS-API.Worker.dll"]
