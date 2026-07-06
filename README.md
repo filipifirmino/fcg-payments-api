@@ -120,6 +120,8 @@ PaymentsAPI (OrderPlacedConsumer)
 ### OrderPlacedEvent (consumido)
 
 ```csharp
+namespace FCG.Events;
+
 public record OrderPlacedEvent
 {
     public Guid OrderId { get; init; }
@@ -132,9 +134,13 @@ public record OrderPlacedEvent
 }
 ```
 
+`UserEmail` vem do CatalogAPI, que extrai o e-mail diretamente do JWT autenticado na requisição de compra (claim `"Email"`) — nenhuma consulta adicional ao UsersAPI é necessária.
+
 ### PaymentProcessedEvent (publicado)
 
 ```csharp
+namespace FCG.Events;
+
 public record PaymentProcessedEvent
 {
     public Guid OrderId { get; init; }
@@ -148,6 +154,10 @@ public record PaymentProcessedEvent
     public DateTime ProcessedAt { get; init; }
 }
 ```
+
+Publicado em exchange fixo `PaymentProcessed`. Consumido em filas independentes pelo `CatalogAPI` (`catalog-api-payment-processed`) e pelo `NotificationsAPI` (`notifications-worker-payment-processed`) — cada um com sua própria fila, para garantir que ambos recebam uma cópia da mensagem (fan-out), em vez de competirem pela mesma fila.
+
+> **Namespace compartilhado (`FCG.Events`):** o MassTransit identifica o tipo de uma mensagem no wire pelo namespace + nome do tipo .NET, não pelo assembly. `OrderPlacedEvent` e `PaymentProcessedEvent` existem fisicamente neste repositório e também em `fcg-catalog-api`/`fcg-notifications-api`, mas **precisam declarar o mesmo namespace `FCG.Events`** em todos — caso contrário, publisher e consumer geram identidades de mensagem diferentes e o evento é descartado silenciosamente (fila `_skipped`, sem erro nem exceção). Ao alterar um desses contratos, replique a mudança (e o namespace) nos demais repositórios envolvidos.
 
 ---
 
@@ -251,14 +261,16 @@ dotnet ef migrations add <NomeDaMigration> \
 
 ## Kubernetes
 
-Os manifests estão em `/k8s/`:
+Os manifests estão em `/k8s/`, e todos os recursos devem ser criados no namespace `fcg`:
 
 ```bash
+kubectl apply -f k8s/00-namespace.yaml
 kubectl apply -f k8s/
 ```
 
 | Arquivo | Conteúdo |
 |---|---|
+| `00-namespace.yaml` | Cria o namespace `fcg` (aplicado primeiro automaticamente por ordem alfabética) |
 | `configmap.yaml` | RabbitMq__Host, RabbitMq__Username, DOTNET_ENVIRONMENT |
 | `secret.yaml` | ConnectionStrings__Postgres, RabbitMq__Password |
 | `deployment.yaml` | 1 replica, envFrom configmap + secret |
@@ -267,7 +279,7 @@ kubectl apply -f k8s/
 Verificar pods:
 
 ```bash
-kubectl get pods -l app=payments-worker
+kubectl get pods -n fcg -l app=payments-worker
 ```
 
 ---
@@ -306,12 +318,12 @@ fcg-payments-api/
 │   │
 │   ├── FCG-PAYMENTS-API.Application/
 │   │   ├── Configure/           # ApplicationConfigure (DI)
-│   │   ├── Events/              # OrderPlacedEvent, PaymentProcessedEvent
+│   │   ├── Events/              # OrderPlacedEvent, PaymentProcessedEvent (namespace FCG.Events)
 │   │   ├── Interfaces/          # IApprovalStrategy
 │   │   └── Services/            # PaymentService, RandomApprovalStrategy
 │   │
 │   ├── FCG-PAYMENTS-API.Infra/
-│   │   ├── Configure/           # ConfigureInfra (DI + MassTransit)
+│   │   ├── Configure/           # ConfigureInfra (DI + MassTransit + SetEntityName)
 │   │   ├── Consumers/           # OrderPlacedConsumer
 │   │   ├── Migrations/          # EF Core migrations
 │   │   ├── Repositories/        # RepositoryBase, PaymentRepository
@@ -335,6 +347,7 @@ fcg-payments-api/
 │           └── Infra/           # PaymentRepositoryTests
 │
 ├── k8s/
+│   ├── 00-namespace.yaml       # Cria o namespace fcg
 │   ├── configmap.yaml
 │   ├── secret.yaml
 │   ├── deployment.yaml
