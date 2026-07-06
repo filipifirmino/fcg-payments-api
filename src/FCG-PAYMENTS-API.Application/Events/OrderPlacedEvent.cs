@@ -1,4 +1,4 @@
-namespace FCG.Payments.Application.Events;
+namespace FCG.Events;
 
 public record OrderPlacedEvent
 {

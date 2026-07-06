@@ -1,4 +1,4 @@
-using FCG.Payments.Application.Events;
+using FCG.Events;
 using FCG.Payments.Application.Interfaces;
 using FCG.Payments.Domain.Entities;
 using FCG.Payments.Domain.Enums;

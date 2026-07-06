@@ -1,5 +1,5 @@
 using Bogus;
-using FCG.Payments.Application.Events;
+using FCG.Events;
 using FCG.Payments.Application.Interfaces;
 using FCG.Payments.Application.Services;
 using FCG.Payments.Domain.Entities;
