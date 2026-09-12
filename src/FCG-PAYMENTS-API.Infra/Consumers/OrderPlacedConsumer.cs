@@ -1,4 +1,5 @@
 using FCG.Events;
+using FCG.Payments.Application.Interfaces;
 using FCG.Payments.Domain.Interfaces;
 using MassTransit;
 using Microsoft.Extensions.Logging;
@@ -7,6 +8,7 @@ namespace FCG.Payments.Infra.Consumers;
 
 public class OrderPlacedConsumer(
     IPaymentService paymentService,
+    INotificationQueuePublisher notificationQueuePublisher,
     ILogger<OrderPlacedConsumer> logger) : IConsumer<OrderPlacedEvent>
 {
     public async Task Consume(ConsumeContext<OrderPlacedEvent> context)
@@ -31,5 +33,10 @@ public class OrderPlacedConsumer(
             Reason = payment.Reason,
             ProcessedAt = payment.ProcessedAt
         });
+
+        // Dual-publish: mesma informação também vai para SQS, fora do RabbitMQ.
+        await notificationQueuePublisher.PublishPaymentProcessedAsync(
+            payment.OrderId, payment.UserId, payment.GameId, payment.GameTitle, payment.UserEmail,
+            payment.Amount, payment.Status.ToString(), payment.Reason, payment.ProcessedAt);
     }
 }

@@ -1,6 +1,9 @@
+using Amazon.SQS;
 using FCG.Events;
+using FCG.Payments.Application.Interfaces;
 using FCG.Payments.Domain.Interfaces;
 using FCG.Payments.Infra.Consumers;
+using FCG.Payments.Infra.Messaging;
 using FCG.Payments.Infra.Repositories;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
@@ -15,6 +18,7 @@ public static class ConfigureInfra
     {
         services.AddRepositories();
         services.AddRabbitMq(config);
+        services.AddAwsMessaging();
         return services;
     }
 
@@ -22,6 +26,12 @@ public static class ConfigureInfra
     {
         services.AddScoped(typeof(IRepositoryBase<>), typeof(RepositoryBase<>));
         services.AddScoped<IPaymentRepository, PaymentRepository>();
+    }
+
+    private static void AddAwsMessaging(this IServiceCollection services)
+    {
+        services.AddAWSService<IAmazonSQS>();
+        services.AddScoped<INotificationQueuePublisher, SqsNotificationQueuePublisher>();
     }
 
     private static void AddRabbitMq(this IServiceCollection services, IConfiguration config)
