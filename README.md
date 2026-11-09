@@ -178,10 +178,10 @@ A implementação padrão (`RandomApprovalStrategy`) usa `Random.Shared` — thr
 
 | Variável | Descrição | Padrão |
 |---|---|---|
-| `ConnectionStrings__Postgres` | Connection string do PostgreSQL | `Host=postgres;Port=5432;Database=fcg_payments_db;Username=fcg;Password=fcg_secret` |
+| `ConnectionStrings__Postgres` | Connection string do PostgreSQL | `Host=postgres;Port=5432;Database=fcg_payments_db;Username=fcg;Password=<senha-do-postgres>` |
 | `RabbitMq__Host` | Host do RabbitMQ | `rabbitmq` |
 | `RabbitMq__Username` | Usuário do RabbitMQ | `guest` |
-| `RabbitMq__Password` | Senha do RabbitMQ | `guest` |
+| `RabbitMq__Password` | Senha do RabbitMQ | — |
 | `DOTNET_ENVIRONMENT` | Ambiente de execução | `Production` |
 
 Copie `.env` e ajuste conforme necessário:
@@ -234,7 +234,7 @@ docker compose down
 
 ```bash
 docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management-alpine
-docker run -d --name postgres -e POSTGRES_USER=fcg -e POSTGRES_PASSWORD=fcg_secret -e POSTGRES_DB=fcg_payments_db -p 5432:5432 postgres:16-alpine
+docker run -d --name postgres -e POSTGRES_USER=fcg -e POSTGRES_PASSWORD=<senha-do-postgres> -e POSTGRES_DB=fcg_payments_db -p 5432:5432 postgres:16-alpine
 ```
 
 ### 2. Restaure as dependências
@@ -272,7 +272,7 @@ kubectl apply -f k8s/
 |---|---|
 | `00-namespace.yaml` | Cria o namespace `fcg` (aplicado primeiro automaticamente por ordem alfabética) |
 | `configmap.yaml` | RabbitMq__Host, RabbitMq__Username, DOTNET_ENVIRONMENT |
-| `secret.yaml` | ConnectionStrings__Postgres, RabbitMq__Password |
+| `secret.yaml` (não versionado) | ConnectionStrings__Postgres, RabbitMq__Password — criado por `fcg-infra/scripts/create-secrets.*` (local) ou pelo ExternalSecret (EKS) |
 | `deployment.yaml` | 1 replica, envFrom configmap + secret |
 | `service.yaml` | Headless service (worker não expõe porta HTTP) |
 

@@ -414,3 +414,7 @@ appsettings.Development.json
 appsettings.Production.json
 appsettings.Staging.json
 k8s/secret.yaml
+
+# Segredos: nunca versionar (ver .env.example; no cluster ver fcg-infra/k8s/external-secrets)
+.env
+k8s/**/secret.yaml

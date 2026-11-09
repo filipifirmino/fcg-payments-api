@@ -45,7 +45,7 @@ public static class ConfigureInfra
                 cfg.Host(config["RabbitMq:Host"] ?? "localhost", h =>
                 {
                     h.Username(config["RabbitMq:Username"] ?? "guest");
-                    h.Password(config["RabbitMq:Password"] ?? "guest");
+                    h.Password(config["RabbitMq:Password"] ?? throw new InvalidOperationException("RabbitMq:Password não configurado"));
                 });
 
                 // O nome do exchange precisa ser igual em todos os serviços que publicam/consomem

@@ -3,7 +3,7 @@ services:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: fcg
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fcg_secret}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
       POSTGRES_DB: fcg_payments_db
     ports:
       - "5433:5432"
@@ -22,7 +22,7 @@ services:
       - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?defina RABBITMQ_PASSWORD no .env}
     healthcheck:
       test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
       interval: 10s
@@ -38,10 +38,10 @@ services:
     ports:
       - "8082:8082"
     environment:
-      ConnectionStrings__Postgres: "Host=postgres;Port=5432;Database=fcg_payments_db;Username=fcg;Password=${POSTGRES_PASSWORD:-fcg_secret}"
+      ConnectionStrings__Postgres: "Host=postgres;Port=5432;Database=fcg_payments_db;Username=fcg;Password=${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}"
       RabbitMq__Host: ${RABBITMQ_HOST:-rabbitmq}
       RabbitMq__Username: ${RABBITMQ_USERNAME:-guest}
-      RabbitMq__Password: ${RABBITMQ_PASSWORD:-guest}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD:?defina RABBITMQ_PASSWORD no .env}
       DOTNET_ENVIRONMENT: ${DOTNET_ENVIRONMENT:-Production}
     depends_on:
       postgres:
