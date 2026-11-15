@@ -184,10 +184,10 @@ A implementação padrão (`RandomApprovalStrategy`) usa `Random.Shared` — thr
 | `RabbitMq__Password` | Senha do RabbitMQ | — |
 | `DOTNET_ENVIRONMENT` | Ambiente de execução | `Production` |
 
-Copie `.env` e ajuste conforme necessário:
+Não há valores padrão para senhas: o `docker-compose.yml` e a aplicação falham se elas não forem definidas. Copie o modelo e preencha (o `.env` está no `.gitignore` e nunca deve ser commitado):
 
 ```bash
-cp .env .env.local
+cp .env.example .env
 ```
 
 ---
@@ -349,13 +349,12 @@ fcg-payments-api/
 ├── k8s/
 │   ├── 00-namespace.yaml       # Cria o namespace fcg
 │   ├── configmap.yaml
-│   ├── secret.yaml
 │   ├── deployment.yaml
 │   └── service.yaml
 │
 ├── Dockerfile
 ├── docker-compose.yml
-├── .env
+├── .env.example            # Modelo das variáveis obrigatórias (o .env real não é versionado)
 └── FCG-PAYMENTS-API.slnx
 ```
 
