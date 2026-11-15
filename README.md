@@ -182,6 +182,8 @@ A implementação padrão (`RandomApprovalStrategy`) usa `Random.Shared` — thr
 | `RabbitMq__Host` | Host do RabbitMQ | `rabbitmq` |
 | `RabbitMq__Username` | Usuário do RabbitMQ | `guest` |
 | `RabbitMq__Password` | Senha do RabbitMQ | — |
+| `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_REGION` | Credenciais do IAM user `fcg-services` (publicação na fila SQS de notificações) | — / — / `us-east-1` |
+| `Aws__Sqs__PaymentProcessedQueueUrl` | URL da fila SQS `fcg-payment-processed` (se ausente, o dual-publish para a Lambda é ignorado) | — |
 | `DOTNET_ENVIRONMENT` | Ambiente de execução | `Production` |
 
 Não há valores padrão para senhas: o `docker-compose.yml` e a aplicação falham se elas não forem definidas. Copie o modelo e preencha (o `.env` está no `.gitignore` e nunca deve ser commitado):
